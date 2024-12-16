@@ -10,20 +10,20 @@ type WeatherDataProps = {
     pressure: number;
     humidity: number;
   };
-  name: string;
   dt: number;
 };
 
 export default function Weather() {
   const [weatherData, setWeatherData] = useState<WeatherDataProps[]>([]);
+  const [cityName, setCityName] = useState("Okinawa");
 
   useEffect(() => {
-    console.log("Fetching weather data...");
-
     async function fetchWeatherApi() {
+      if (!cityName) return;
+
       const apiUrl = `${
         import.meta.env.VITE_APP_OW_API_URL
-      }/weather/?q=Okinawa&APPID=${
+      }/weather/?q=${cityName}&APPID=${
         import.meta.env.VITE_APP_OW_API_KEY
       }&units=metric`;
 
@@ -37,13 +37,13 @@ export default function Weather() {
         const data = await response.json();
         console.log(data);
 
-        setWeatherData((prevData) => [...prevData, data]);
+        setWeatherData([data]);
       } catch (error) {
         console.error("Error fetching weather data:", error);
       }
     }
     fetchWeatherApi();
-  }, []);
+  }, [cityName]);
 
   const firstWeatherData = weatherData[0];
   const formatUnixTimeToDate = (unixTime: number): string => {
@@ -58,16 +58,43 @@ export default function Weather() {
     ? formatUnixTimeToDate(firstWeatherData.dt)
     : "";
 
+  const getCityName = () => {
+    const inputElement = document.getElementById(
+      "cityName"
+    ) as HTMLInputElement;
+    if (inputElement) {
+      const newCityName = inputElement.value.trim();
+      if (newCityName) {
+        setCityName(newCityName);
+      }
+    }
+  };
+
   return (
     <div className="p-4">
       {firstWeatherData ? (
-        <div className="p-7 w-96 h-56 m-auto bg-blue-300 rounded-md text-white">
+        <div className="p-7 w-100 h-70 m-auto bg-blue-300 rounded-md text-white">
           <div className="flex justify-between">
             <div>
               <p className="font-light tracking-wider text-sm">City Name</p>
-              <p className="font-bold tracking-wider">
-                {firstWeatherData.name}
-              </p>
+
+              <div className="flex border-2 border-blue-500 overflow-hidden max-w-md mx-auto font-[sans-serif]">
+                <input
+                  type="text"
+                  placeholder="Search Something..."
+                  className="w-full outline-none bg-white text-gray-600 text-sm px-4 py-3"
+                  id="cityName"
+                />
+                <button
+                  type="button"
+                  className="flex items-center justify-center bg-[#007bff] px-5 text-sm text-white"
+                  onClick={getCityName}
+                >
+                  Search
+                </button>
+              </div>
+
+              <p className="font-bold tracking-wider">{cityName}</p>
             </div>
             <div>
               <img
