@@ -16,6 +16,18 @@ type WeatherDataProps = {
 export default function Weather() {
   const [weatherData, setWeatherData] = useState<WeatherDataProps[]>([]);
   const [cityName, setCityName] = useState("Okinawa");
+  const firstWeatherData = weatherData[0];
+  const getCityName = () => {
+    const inputElement = document.getElementById(
+      "cityName"
+    ) as HTMLInputElement;
+    if (inputElement) {
+      const newCityName = inputElement.value.trim();
+      if (newCityName) {
+        setCityName(newCityName);
+      }
+    }
+  };
 
   useEffect(() => {
     async function fetchWeatherApi() {
@@ -45,58 +57,28 @@ export default function Weather() {
     fetchWeatherApi();
   }, [cityName]);
 
-  const firstWeatherData = weatherData[0];
-  const formatUnixTimeToDate = (unixTime: number): string => {
-    const date = new Date(unixTime * 1000);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}/${month}/${day}`;
-  };
-
-  const formattedDate = firstWeatherData
-    ? formatUnixTimeToDate(firstWeatherData.dt)
-    : "";
-
-  const getCityName = () => {
-    const inputElement = document.getElementById(
-      "cityName"
-    ) as HTMLInputElement;
-    if (inputElement) {
-      const newCityName = inputElement.value.trim();
-      if (newCityName) {
-        setCityName(newCityName);
-      }
-    }
-  };
-
   return (
     <div className="p-4">
       {firstWeatherData ? (
-        <div className="p-7 w-100 h-70 m-auto bg-blue-300 rounded-md text-white">
-          <div className="flex justify-between">
-            <div>
-              <p className="font-light tracking-wider text-sm">City Name</p>
+        <div className="text-gray-700">
+          <div className="flex border-2 border-gray-500">
+            <input
+              type="text"
+              placeholder="Search Place.."
+              className="w-full outline-none text-sm px-4 py-3"
+              id="cityName"
+            />
+            <button
+              type="button"
+              className="flex items-center justify-center bg-gray-500 px-5 text-sm"
+              onClick={getCityName}
+            >
+              Search
+            </button>
+          </div>
 
-              <div className="flex border-2 border-blue-500 overflow-hidden max-w-md mx-auto font-[sans-serif]">
-                <input
-                  type="text"
-                  placeholder="Search Something..."
-                  className="w-full outline-none bg-white text-gray-600 text-sm px-4 py-3"
-                  id="cityName"
-                />
-                <button
-                  type="button"
-                  className="flex items-center justify-center bg-[#007bff] px-5 text-sm text-white"
-                  onClick={getCityName}
-                >
-                  Search
-                </button>
-              </div>
-
-              <p className="font-bold tracking-wider">{cityName}</p>
-            </div>
-            <div>
+          <div className="text-center m-10">
+            <div className="flex justify-center items-center">
               <img
                 src={`${import.meta.env.VITE_APP_OW_ICON_URL}/${
                   firstWeatherData.weather[0].icon
@@ -104,34 +86,15 @@ export default function Weather() {
                 alt={firstWeatherData.weather[0].description}
               />
             </div>
-          </div>
-          <div className="mt-3">
-            <p className="font-light tracking-wider text-sm">
-              Weather Condition
+            <p className="font-normal tracking-wider text-xl">
+              {firstWeatherData.weather[0].main.toUpperCase()}
             </p>
-            <p className="font-bold tracking-wider">
-              {firstWeatherData.weather[0].main}
+            <p className="font-bold tracking-wider text-sm font-light text-gray-500">
+              {cityName.toUpperCase()}
             </p>
-          </div>
-          <div className="mt-5 flex justify-between">
-            <div>
-              <p className="font-light tracking-wider text-sm">Date</p>
-              <p className="font-bold tracking-wider text-sm">
-                {formattedDate}
-              </p>
-            </div>
-            <div>
-              <p className="font-light tracking-wider text-sm">Temperature</p>
-              <p className="font-bold tracking-wider text-sm">
-                {Math.round(firstWeatherData.main.temp)}℃
-              </p>
-            </div>
-            <div>
-              <p className="font-light tracking-wider text-sm">Humidity</p>
-              <p className="font-bold tracking-wider text-sm">
-                {firstWeatherData.main.humidity}%
-              </p>
-            </div>
+            <p className="tracking-wider text-8xl font-light m-10">
+              {Math.round(firstWeatherData.main.temp)}°
+            </p>
           </div>
         </div>
       ) : (
